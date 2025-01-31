@@ -93,6 +93,14 @@ Functions of multiple arguments in Haskell are "curried".
 
   - What happens if we "partially apply" a function of multiple arguments?
 
+    an example:
+
+    given:
+      `repeatStr :: Int -> String -> String` (aka `repeatStr :: Int -> ( String -> String )`)
+
+    if we call this like `repeatStr 5`, what do we get?
+        `(String -> String)`, a fn that takes a string and applies repeatStr w/ the first arg being 5 to it
+
 Aside: what about:
 
     foo4 :: (Bool -> Char) -> Int
@@ -129,22 +137,74 @@ Polymorphic functions
 
 - What are polymorphic functions?
 
+  ### An example: The identity fn
+
+  Let's type `λx.x` in Haskell. Using concrete types gets tricky.
+  Instead, we can use type variables to make our identity fn polymorphic:
+
+    `identity :: a -> a`
+
+  In this type signature for our `identity` fn, `a` is a type variable—an id that stands in for the type that's given.
+  Our `identity` fn says give me anything, & I'll give you the same type back.
+  This is called _parametric polymorphism_.
+
+  Looking at this example, we can now answer the original question, "what are polymorphic functions?"
+  As we saw, a polymorphic function is one that can be applied to any given argument type (assumint the argument type conforms to any constraints).
+
+  | Aside: unconstrained/arbitrary type vars in Haskell
+  | ---------------------------------------------------
+  | in Haskell, there's no universal behavior that can be applied to all types, no matter what type.
+  | looking again at our `identity :: a -> a` above, we never specified the definition.
+  | naively, we might say that knowing only the type signature, it's possible that `identity` might
+  | still modify the value of type `a`.
+  | however, because haskell has no universal behavior, we can deduce that `(a -> a)` will always be
+  | the idenity function as the only possible thing we can do with an unknown value is say, "here's
+  | the value" (e.g. return it).
+  | 
+  | we can use this knowledge to conclude similar things about a function of the type `(a -> b -> a)`.
+  | this unknown function has a new arg of unknown type `b`, yet we can still know that all we can
+  | possibly get back is the value of the first arg of type `a`.
+
 - What do their type declarations look like?
 
 Check out these polymorphic functions? Can you guess what they do?
   
-      id
-      const
-      fst
-      snd
-      .
-      flip 
+  - `id :: a -> a`
+    the identity function
+  - `const :: a -> b -> a`
+    makes a function that always returns the value given first of type `a`.
+    ex: `const True` returns a function of type `const True :: b -> Bool` that 
+    always returns `True`.
+  - `fst :: (a, b) -> a`
+    returns the first element of a two tuple
+  - `snd :: (a, b) -> b`
+    returns the second element of a two tuple
+  - `. :: (b -> c) -> (a -> b) -> a -> c`
+    composes two functions of (b -> c) & (a -> b) & returns a function of a -> c; 
+    e.g. given 
+      A, B, C <- sets representing domains & ranges of functions
+      g: B -> C
+      h: A -> B
+    then f can be defined as the composition of g & h like:
+      f <- g . h
+    giving us a new function that takes a value in A & returns a value in C
+  - `flip :: (a -> b -> c) -> b -> a -> c`
 
 The type declaration of a polymorphic function can give a lot of information about what the function does! (Why?)
 
 
 Type Classes (aka Classes)
 --------------------------
+
+| Comparison to known things
+| --------------------------
+| These are the same idea (& behave in almost exactly the same way) as Rust's
+| Traits. 
+| (Similarly, the parametric polymorphic functions above are the same
+| idea and behave in nearly the same way as Rust's Generics--only differing at
+| runtime implementations since Haskell strips all types at runtime in parametric
+| polymorphic functions, while Rust makes a new copy of each function for each
+| type it's called on.)
 
 - What is a type class?
 
